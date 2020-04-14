@@ -1,9 +1,10 @@
 const express = require("express");
+const cors = require('cors')
 const db = require("../data/dbConfig");
 const server = express();
 
 server.use(express.json());
-
+server.use(cors())
 server.get("/", (req, res) => {
     res.status(200).json({ server: "be working"})
 });
@@ -94,8 +95,32 @@ server.get("/api/accounts", (req, res) => {
             res.status(404).json({ message: "no posts by that id found" });
           }
       })
-    
   });
   
+  server.get("/api/customers", (req,res) => {
+    db.select("*")
+    .from("customers")
+    .then(accounts => {
+        console.log(req.query)
+      res.status(200).json({ data: accounts });
+    })
+    .catch(error => {
+      console.log(error);
+      res.status(500).json({ error: error.message });
+    });
+  })
+
+  server.delete("/api/customers/:id", (req, res) => {
+    db("customers")
+      .where({ customer_id: req.params.id })
+      .del()
+      .then(count => {
+        if (count > 0) {
+            res.status(200).json({ message: "Deleted" });
+          } else {
+            res.status(404).json({ message: "no posts by that id found" });
+          }
+      })
+  });
 
 module.exports = server;
